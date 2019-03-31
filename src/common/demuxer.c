@@ -844,7 +844,7 @@ static int
 
             options->filename = argv[++i];
 			get_extension(options->filename, ext);
-            if (strcmp(ext, ".mp4") && strcmp(ext, ".m4a") && strcmp(ext, ".m4v"))
+            if (strcasecmp(ext, ".mp4") && strcasecmp(ext, ".m4a") && strcasecmp(ext, ".m4v") && strcasecmp(ext, ".mov"))
             {
                 return -1;
             }
