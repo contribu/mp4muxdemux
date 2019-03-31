@@ -1,7 +1,103 @@
 <?xml version='1.0' encoding='utf-8'?>
-<plugin id="true" version="true" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+<plugin id="cordova-plugin-mp4muxdemux" version="0.1.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
     <name>mp4muxdemux</name>
     <js-module name="mp4muxdemux" src="www/mp4muxdemux.js">
         <clobbers target="cordova.plugins.mp4muxdemux" />
     </js-module>
+    <platform name="ios">
+        <config-file target="config.xml" parent="/*">
+            <feature name="mp4muxdemux">
+                <param name="ios-package" value="CDVMp4muxdemux"/>
+            </feature>
+        </config-file>
+
+        <header-file src="src/ios/CDVMp4muxdemux.h" />
+        <source-file src="src/ios/CDVMp4muxdemux.m" />
+
+        <header-file src="src/common/muxer.h" />
+        <header-file src="src/common/demuxer.h" />
+        <source-file src="src/common/muxer.c" />
+        <source-file src="src/common/demuxer.c" />
+
+        <header-file src="deps/dlb_mp4base/include/boolean.h" />
+        <header-file src="deps/dlb_mp4base/include/c99_inttypes.h" />
+        <header-file src="deps/dlb_mp4base/include/dsi.h" />
+        <header-file src="deps/dlb_mp4base/include/io_base.h" />
+        <header-file src="deps/dlb_mp4base/include/list_itr.h" />
+        <header-file src="deps/dlb_mp4base/include/memory_chk.h" />
+        <header-file src="deps/dlb_mp4base/include/mp4_ctrl.h" />
+        <header-file src="deps/dlb_mp4base/include/mp4_encrypt.h" />
+        <header-file src="deps/dlb_mp4base/include/mp4_frag.h" />
+        <header-file src="deps/dlb_mp4base/include/mp4_isom.h" />
+        <header-file src="deps/dlb_mp4base/include/mp4_muxer.h" />
+        <header-file src="deps/dlb_mp4base/include/mp4_stream.h" />
+        <header-file src="deps/dlb_mp4base/include/msg_log.h" />
+        <header-file src="deps/dlb_mp4base/include/parser.h" />
+        <header-file src="deps/dlb_mp4base/include/parser_aac.h" />
+        <header-file src="deps/dlb_mp4base/include/parser_ac4.h" />
+        <header-file src="deps/dlb_mp4base/include/parser_avc_dec.h" />
+        <header-file src="deps/dlb_mp4base/include/parser_avc_dpb.h" />
+        <header-file src="deps/dlb_mp4base/include/parser_dd.h" />
+        <header-file src="deps/dlb_mp4base/include/parser_defs.h" />
+        <header-file src="deps/dlb_mp4base/include/parser_hevc_dec.h" />
+        <header-file src="deps/dlb_mp4base/include/registry.h" />
+        <header-file src="deps/dlb_mp4base/include/return_codes.h" />
+        <header-file src="deps/dlb_mp4base/include/utils.h" />
+
+        <source-file src="deps/dlb_mp4base/src/esparser/dsi.c" />
+        <source-file src="deps/dlb_mp4base/src/esparser/parser.c" />
+        <source-file src="deps/dlb_mp4base/src/esparser/parser_aac.c" />
+        <source-file src="deps/dlb_mp4base/src/esparser/parser_ac4.c" />
+        <source-file src="deps/dlb_mp4base/src/esparser/parser_avc.c" />
+        <source-file src="deps/dlb_mp4base/src/esparser/parser_avc_dec.c" />
+        <source-file src="deps/dlb_mp4base/src/esparser/parser_avc_dpb.c" />
+        <source-file src="deps/dlb_mp4base/src/esparser/parser_dd.c" />
+        <source-file src="deps/dlb_mp4base/src/esparser/parser_hevc.c" />
+        <source-file src="deps/dlb_mp4base/src/esparser/parser_hevc_dec.c" />
+        <source-file src="deps/dlb_mp4base/src/util/io_base.c" />
+        <source-file src="deps/dlb_mp4base/src/util/io_buffer.c" />
+        <source-file src="deps/dlb_mp4base/src/util/io_file.c" />
+        <source-file src="deps/dlb_mp4base/src/util/list_itr.c" />
+        <source-file src="deps/dlb_mp4base/src/util/msg_log.c" />
+        <source-file src="deps/dlb_mp4base/src/util/registry.c" />
+        <source-file src="deps/dlb_mp4base/src/util/utils.c" />
+        <source-file src="deps/dlb_mp4base/src/mp4_isom.c" />
+        <source-file src="deps/dlb_mp4base/src/mp4_muxer.c" />
+        <source-file src="deps/dlb_mp4base/src/mp4_stream.c" />
+
+        <header-file src="deps/dlb_mp4base/frontend/ema_mp4_ifc.h" />
+        <source-file src="deps/dlb_mp4base/frontend/ema_mp4_mux_api.c" />
+
+        <header-file src="deps/dlb_mp4demux/include/es_sink.h" />
+        <header-file src="deps/dlb_mp4demux/include/file_movie.h" />
+        <header-file src="deps/dlb_mp4demux/include/file_stream.h" />
+        <header-file src="deps/dlb_mp4demux/include/fragment_stream.h" />
+        <header-file src="deps/dlb_mp4demux/include/md_sink.h" />
+        <header-file src="deps/dlb_mp4demux/include/movie.h" />
+        <header-file src="deps/dlb_mp4demux/include/mp4_info.h" />
+        <header-file src="deps/dlb_mp4demux/include/mp4d_box_read.h" />
+        <header-file src="deps/dlb_mp4demux/include/mp4d_buffer.h" />
+        <header-file src="deps/dlb_mp4demux/include/mp4d_demux.h" />
+        <header-file src="deps/dlb_mp4demux/include/mp4d_internal.h" />
+        <header-file src="deps/dlb_mp4demux/include/mp4d_nav.h" />
+        <header-file src="deps/dlb_mp4demux/include/mp4d_trackreader.h" />
+        <header-file src="deps/dlb_mp4demux/include/mp4d_types.h" />
+        <header-file src="deps/dlb_mp4demux/include/player.h" />
+        <header-file src="deps/dlb_mp4demux/include/stream.h" />
+        <header-file src="deps/dlb_mp4demux/include/util.h" />
+
+        <source-file src="deps/dlb_mp4demux/src/es_sink.c" />
+        <source-file src="deps/dlb_mp4demux/src/file_movie.c" />
+        <source-file src="deps/dlb_mp4demux/src/file_stream.c" />
+        <source-file src="deps/dlb_mp4demux/src/fragment_stream.c" />
+        <source-file src="deps/dlb_mp4demux/src/md_sink.c" />
+        <source-file src="deps/dlb_mp4demux/src/mp4d_box_read.c" />
+        <source-file src="deps/dlb_mp4demux/src/mp4d_buffer.c" />
+        <source-file src="deps/dlb_mp4demux/src/mp4d_demux.c" />
+        <source-file src="deps/dlb_mp4demux/src/mp4d_nav.c" />
+        <source-file src="deps/dlb_mp4demux/src/mp4d_trackreader.c" />
+        <source-file src="deps/dlb_mp4demux/src/player.c" />
+        <source-file src="deps/dlb_mp4demux/src/stream.c" />
+        <source-file src="deps/dlb_mp4demux/src/util.c" />
+    </platform>
 </plugin>
