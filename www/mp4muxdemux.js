@@ -111,4 +111,4 @@ var create = function (options) {
     return instance;
 };
 
-module.exports = create();
+module.exports = create({});
