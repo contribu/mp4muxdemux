@@ -11,7 +11,7 @@
   "scripts": {
     "test:android": "cordova-paramedic --cleanUpAfterRun --verbose --platform android --plugin .",
     "test:browser": "cordova-paramedic --cleanUpAfterRun --verbose --platform browser --plugin .",
-    "test:ios": "cordova-paramedic --cleanUpAfterRun --verbose --platform ios --plugin .",
+    "test:ios": "cordova-paramedic --config tests/config/ios.json --plugin .",
     "test:windows": "cordova-paramedic --config .paramedic.windows.config.js"
   },
   "keywords": [
@@ -21,6 +21,6 @@
   "author": "",
   "license": "CC0",
   "devDependencies": {
-    "cordova-paramedic": "^0.5.0"
+    "cordova-paramedic": "git+https://github.com/apache/cordova-paramedic.git"
   }
 }
