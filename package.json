@@ -19,7 +19,7 @@
     "cordova-ios"
   ],
   "author": "",
-  "license": "ISC",
+  "license": "CC0",
   "devDependencies": {
     "cordova-paramedic": "^0.5.0"
   }
