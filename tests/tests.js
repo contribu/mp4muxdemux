@@ -1,7 +1,36 @@
+const _ = require('lodash');
+
 exports.defineAutoTests = function () {
-    // before(() => {
-    //
-    // });
+    let testFiles = {};
+
+    // download test data
+    beforeAll((done) => {
+        downloader.init({folder: "test_data", unzip: false, check: true});
+
+        document.addEventListener('DOWNLOADER_downloadSuccess', function(event) {
+            _.each(event.data, (fileEntry) => {
+                testFiles[fileEntry.name] = fileEntry;
+            });
+            done();
+        });
+        downloader.getMultipleFiles([
+            {
+                url: 'https://github.com/contribu/mp4muxdemux/raw/master/tests/data/h264aaclc.mp4'
+            },
+            {
+                url: 'https://github.com/contribu/mp4muxdemux/raw/master/tests/data/h264dolbyac3.mp4'
+            },
+            {
+                url: 'https://github.com/contribu/mp4muxdemux/raw/master/tests/data/h264dolbyac3.mp4'
+            },
+            {
+                url: 'https://github.com/contribu/mp4muxdemux/raw/master/tests/data/h265dolbyac3.mp4'
+            },
+            {
+                url: 'https://github.com/contribu/mp4muxdemux/raw/master/tests/data/mpeg4spaaclc.mp4'
+            },
+        ]);
+    });
 
     describe("create", function () {
         it("defined", function () {
@@ -31,12 +60,27 @@ exports.defineAutoTests = function () {
             expect(cordova.plugins.mp4muxdemux.getAssetInfoDeferred).toBeDefined();
         });
 
-        // it("success", function (done) {
-        //     cordova.plugins.mp4muxdemux.getAssetInfoDeferred(h264AacMp4Path)
-        //         .then((info) => {
-        //             expect(info.)
-        //             done();
+        // const tests = [
+        //     {
+        //         name: 'h264aaclc.mp4',
+        //         input: testFiles['h264aaclc.mp4'].nativeURL,
+        //         output: {
+        //             videoFrameRate: 1,
+        //             videoTimeScale: 1,
+        //         }
+        //     },
+        // ];
+        //
+        // _.each(tests, (test) => {
+        //     describe(test.name, function () {
+        //         it("success", function (done) {
+        //             cordova.plugins.mp4muxdemux.getAssetInfoDeferred(test.input)
+        //                 .then((info) => {
+        //                     expect(info).toEqual(test.output);
+        //                     done();
+        //                 });
         //         });
+        //     });
         // });
     });
 
