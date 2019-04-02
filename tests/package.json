@@ -9,7 +9,7 @@
     ]
   },
   "author": "",
-  "license": "ISC",
+  "license": "CC0",
   "dependencies": {
     "lodash": "^4.17.11"
   }
