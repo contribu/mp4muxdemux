@@ -516,7 +516,9 @@ static int
                 }
                 else
                 {
-                    CHECK( es_writer_new(&sink1, track_ID, stream_name, p_data->options.output_folder) );
+                    char extension[16] = { 0 };
+                    snprintf(extension, 15, ".%s", stream_info.hdlr);
+                    CHECK( es_writer_new(&sink1, track_ID, stream_name, p_data->options.output_folder, extension) );
                 }
             }
 
