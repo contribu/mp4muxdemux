@@ -316,6 +316,11 @@ static int
         stream_name = NULL;
         CHECK( p_movie->get_stream_info(p_movie, stream_num, bitrate, &stream_info, &stream_name) );
 
+        // MP4s captured on the iPhone have tracks that are neither sounds nor videos that cause crashes.
+        if (!MP4D_FOURCC_EQ(stream_info.hdlr, "soun") && !MP4D_FOURCC_EQ(stream_info.hdlr, "vide")) {
+            continue;
+        }
+
         track_ID = stream_info.track_id;
         if (track_ID == 0)
         {
