@@ -64,11 +64,14 @@
     CDVPluginResult* pluginResult = nil;
     NSString* path = [command.arguments objectAtIndex:0];
 
-    AVURLAsset* avAsset = [[AVURLAsset alloc]initWithURL:[NSURL fileURLWithPath:path] options:nil];
+    NSDictionary *assetOptions = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:YES] forKey:AVURLAssetPreferPreciseDurationAndTimingKey];
+    AVURLAsset* avAsset = [[AVURLAsset alloc]initWithURL:[NSURL fileURLWithPath:path] options:assetOptions];
 
     if ([[avAsset tracksWithMediaType:AVMediaTypeVideo] count] > 0) {
         AVAssetTrack *videoTrack = [[avAsset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0];
         NSDictionary *result = [NSDictionary dictionaryWithObjectsAndKeys:
+                                [NSNumber numberWithDouble:[avAsset duration].value], @"durationValue",
+                                [NSNumber numberWithDouble:[avAsset duration].timescale], @"durationTimeScale",
                                 [NSNumber numberWithInt:[videoTrack naturalTimeScale]], @"videoTimeScale",
                                 [NSNumber numberWithDouble:[videoTrack nominalFrameRate]], @"videoFrameRate",
                                 nil];
