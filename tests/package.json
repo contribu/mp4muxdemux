@@ -1,0 +1,13 @@
+{
+  "name": "cordova-plugin-mp4muxdemux-test",
+  "version": "0.1.0",
+  "description": "",
+  "cordova": {
+    "id": "true",
+    "platforms": [
+      "ios"
+    ]
+  },
+  "author": "",
+  "license": "CC0"
+}

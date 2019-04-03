@@ -3,4 +3,4 @@
 	url = https://github.com/contribu/dlb_mp4base.git
 [submodule "deps/dlb_mp4demux"]
 	path = deps/dlb_mp4demux
-	url = https://github.com/DolbyLaboratories/dlb_mp4demux.git
+	url = https://github.com/contribu/dlb_mp4demux.git

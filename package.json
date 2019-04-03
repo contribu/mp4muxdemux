@@ -8,10 +8,19 @@
       "ios"
     ]
   },
+  "scripts": {
+    "test:android": "cordova-paramedic --cleanUpAfterRun --verbose --platform android --plugin .",
+    "test:browser": "cordova-paramedic --cleanUpAfterRun --verbose --platform browser --plugin .",
+    "test:ios": "cordova-paramedic --config tests/config/ios.json --plugin .",
+    "test:windows": "cordova-paramedic --config .paramedic.windows.config.js"
+  },
   "keywords": [
     "ecosystem:cordova",
     "cordova-ios"
   ],
   "author": "",
-  "license": "ISC"
+  "license": "CC0",
+  "devDependencies": {
+    "cordova-paramedic": "git+https://github.com/apache/cordova-paramedic.git"
+  }
 }

@@ -1,0 +1,7 @@
+{
+    "platform": "ios",
+    "action": "run",
+    "cleanUpAfterRun": false,
+    "target": "iPhone-SE",
+    "verbose": true
+}

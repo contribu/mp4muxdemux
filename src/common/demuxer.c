@@ -316,6 +316,11 @@ static int
         stream_name = NULL;
         CHECK( p_movie->get_stream_info(p_movie, stream_num, bitrate, &stream_info, &stream_name) );
 
+        // MP4s captured on the iPhone have tracks that are neither sounds nor videos that cause crashes.
+        if (!MP4D_FOURCC_EQ(stream_info.hdlr, "soun") && !MP4D_FOURCC_EQ(stream_info.hdlr, "vide")) {
+            continue;
+        }
+
         track_ID = stream_info.track_id;
         if (track_ID == 0)
         {
@@ -516,7 +521,9 @@ static int
                 }
                 else
                 {
-                    CHECK( es_writer_new(&sink1, track_ID, stream_name, p_data->options.output_folder) );
+                    char extension[16] = { 0 };
+                    snprintf(extension, 15, ".%s", stream_info.hdlr);
+                    CHECK( es_writer_new(&sink1, track_ID, stream_name, p_data->options.output_folder, extension) );
                 }
             }
 
