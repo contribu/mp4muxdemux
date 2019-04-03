@@ -186,6 +186,7 @@ parse_cli(ema_mp4_ctrl_handle_t handle, int32_t argc, int8_t **argv)
             ts = 0;
             /** to probe if have optional input */
             ret = EMA_MP4_MUXED_PARAM_ERR;
+            matrix_t matrix = { 0 };
             while (argc > 2)
             {
                 opt = argv[1];
@@ -200,6 +201,20 @@ parse_cli(ema_mp4_ctrl_handle_t handle, int32_t argc, int8_t **argv)
                     OSAL_SSCANF(argv[2], "%u", &ts);
                     argc -= 2;
                     argv += 2;
+                }
+                else if (!OSAL_STRCASECMP(opt, "--media-matrix") && argc > 10)
+                {
+                    OSAL_SSCANF(argv[2], "%d", &matrix.a);
+                    OSAL_SSCANF(argv[3], "%d", &matrix.b);
+                    OSAL_SSCANF(argv[4], "%d", &matrix.u);
+                    OSAL_SSCANF(argv[5], "%d", &matrix.c);
+                    OSAL_SSCANF(argv[6], "%d", &matrix.d);
+                    OSAL_SSCANF(argv[7], "%d", &matrix.v);
+                    OSAL_SSCANF(argv[8], "%d", &matrix.tx);
+                    OSAL_SSCANF(argv[9], "%d", &matrix.ty);
+                    OSAL_SSCANF(argv[10], "%d", &matrix.w);
+                    argc -= 10;
+                    argv += 10;
                 }
                 else if (!OSAL_STRCASECMP(opt, "--input-video-frame-rate"))
                 {
@@ -257,7 +272,7 @@ parse_cli(ema_mp4_ctrl_handle_t handle, int32_t argc, int8_t **argv)
                     break;
                 }
             }
-            ret = ema_mp4_mux_set_input(handle, fn, lang, enc_name, ts, ua, ub);
+            ret = ema_mp4_mux_set_input(handle, fn, lang, enc_name, ts, ua, ub, matrix);
         }
         else if (!OSAL_STRCASECMP(opt, "--output-file") || !OSAL_STRCASECMP(opt, "-o"))
         {

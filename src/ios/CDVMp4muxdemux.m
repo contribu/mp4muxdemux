@@ -69,9 +69,19 @@
 
     if ([[avAsset tracksWithMediaType:AVMediaTypeVideo] count] > 0) {
         AVAssetTrack *videoTrack = [[avAsset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0];
+        CGAffineTransform matrix = [videoTrack preferredTransform];
+        CMTime duration = [avAsset duration];
+        // sometimes, preferredTransform seems to be wrong
+        // so, use the tkhd json written by demux
         NSDictionary *result = [NSDictionary dictionaryWithObjectsAndKeys:
-                                [NSNumber numberWithDouble:[avAsset duration].value], @"durationValue",
-                                [NSNumber numberWithDouble:[avAsset duration].timescale], @"durationTimeScale",
+                                [NSNumber numberWithDouble:matrix.a], @"matrixA",
+                                [NSNumber numberWithDouble:matrix.b], @"matrixB",
+                                [NSNumber numberWithDouble:matrix.c], @"matrixC",
+                                [NSNumber numberWithDouble:matrix.d], @"matrixD",
+                                [NSNumber numberWithDouble:matrix.tx], @"matrixTx",
+                                [NSNumber numberWithDouble:matrix.ty], @"matrixTy",
+                                [NSNumber numberWithDouble:duration.value], @"durationValue",
+                                [NSNumber numberWithDouble:duration.timescale], @"durationTimeScale",
                                 [NSNumber numberWithInt:[videoTrack naturalTimeScale]], @"videoTimeScale",
                                 [NSNumber numberWithDouble:[videoTrack nominalFrameRate]], @"videoFrameRate",
                                 nil];

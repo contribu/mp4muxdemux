@@ -1,6 +1,6 @@
 exports.defineAutoTests = function () {
     const testDataDir = cordova.file.documentsDirectory + 'test_data/';
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 5 * 60 * 1000;
 
     // download test data
     beforeAll(function (done) {
@@ -81,6 +81,11 @@ exports.defineAutoTests = function () {
                             path: testDataDir +  'h264.h264',
                             timeScale: 600,
                             frameRate: 29.97,
+                            matrix: [
+                                0, 1 * 65536, 0,
+                                -1 * 65536, 0, 0,
+                                1080 * 65536, 0, 1073741824,
+                            ]
                         },
                         {
                             path: testDataDir + 'aaclc.aac',
@@ -95,7 +100,13 @@ exports.defineAutoTests = function () {
                         durationTimeScale: 600,
                         videoFrameRate: 29.97,
                         videoTimeScale: 600,
-                    }
+                        matrixA: 0,
+                        matrixB: 1,
+                        matrixC: -1,
+                        matrixD: 0,
+                        matrixTx: 1080,
+                        matrixTy: 0,
+                    },
                 }
             },
             {
@@ -107,6 +118,11 @@ exports.defineAutoTests = function () {
                             path: testDataDir + 'h265.h265',
                             timeScale: 30000,
                             frameRate: 29.97,
+                            matrix: [
+                                1 * 65536, 0, 0,
+                                0, 1 * 65536, 0,
+                                0, 0, 1073741824,
+                            ]
                         },
                         {
                             path: testDataDir + 'aaclc.aac',
@@ -121,7 +137,13 @@ exports.defineAutoTests = function () {
                         durationTimeScale: 1000,
                         videoFrameRate: 29.97,
                         videoTimeScale: 30000,
-                    }
+                        matrixA: 1,
+                        matrixB: 0,
+                        matrixC: 0,
+                        matrixD: 1,
+                        matrixTx: 0,
+                        matrixTy: 0,
+                    },
                 }
             },
         ];
@@ -150,7 +172,7 @@ exports.defineAutoTests = function () {
                         .then((info) => {
                             console.log('getAssetInfo succeeded');
                             console.log(info);
-                            console.log(test.assetInfo);
+                            console.log(test.output.assetInfo);
                             info.videoFrameRate = +(info.videoFrameRate.toFixed(2));
                             expect(info).toEqual(test.output.assetInfo);
                             done();
@@ -262,6 +284,12 @@ exports.defineAutoTests = function () {
                     durationTimeScale: 600,
                     videoFrameRate: 29.97,
                     videoTimeScale: 600,
+                    matrixA: 0,
+                    matrixB: 1,
+                    matrixC: -1,
+                    matrixD: 0,
+                    matrixTx: 1080,
+                    matrixTy: 0,
                 }
             },
             {
@@ -272,6 +300,12 @@ exports.defineAutoTests = function () {
                     durationTimeScale: 1000,
                     videoFrameRate: 29.97,
                     videoTimeScale: 30000,
+                    matrixA: 1,
+                    matrixB: 0,
+                    matrixC: 0,
+                    matrixD: 1,
+                    matrixTx: 0,
+                    matrixTy: 0,
                 }
             },
         ];
