@@ -231,7 +231,7 @@ exports.defineAutoTests = function () {
                         })
                         .then((results) => {
                             console.log('demux succeeded');
-                            console.log(results);
+                            // console.log(results); // print complex object seems to cause crash when run test with cordova-paramedic
                             console.log(test.output);
                             expect(results.length).toEqual(test.output.length);
                             for (let i = 0; i < results.length; i++) {
