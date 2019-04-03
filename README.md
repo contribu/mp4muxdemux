@@ -63,6 +63,28 @@ ffmpeg -i h264aaclc.mp4 -vcodec libx265 -acodec ac3 h265dolbyac3.mp4
 ffmpeg -i h264aaclc.mp4 -vcodec mpeg4 -acodec copy mpeg4spaaclc.mp4
 ```
 
+## メモ
+
+ユースケースで不要だったので、
+h264, h265, aacの組み合わせしかテストしていない。
+
+muxで入力するファイルは拡張子を正しく指定する必要がある。
+少なくともaac, h264, h265を指定可能。
+
+オリジナルでは、
+demuxで出力されるファイルは対応したもの以外は.dat拡張子で出力されるが、
+トラックの種類に応じて.vide, .sounなどで出力されるように改良した。
+
+aacはdemuxで.adts拡張子で出力される。
+mux時にはaacに変える必要がある。
+
+iphoneで撮影したmp4は音声と動画以外にもトラックが含まれており、
+それらのトラックをオリジナルのdemuxerで分析すると、
+コマンドは成功するが音声と動画トラックのファイルが出力されない。
+音声と動画以外のトラックを無視するように改良した。
+
+demuxerの入力がmov拡張子に対応していなかったので対応した。
+
 ## Contribution
 
 Contributions are welcome.

@@ -25,7 +25,14 @@ const create = (options) => {
         mux: (options) => {
             return instance.Promise.resolve()
                 .then(() => {
-                    return instance._mux(options);
+                    const clone = JSON.parse(JSON.generate(options));
+                    for (let i = 0; i < clone.inputs.length; i++) {
+                        if (clone.inputs[i].frameRate) {
+                            // for accuracy
+                            clone.inputs[i].frameRate = clone.inputs[i].timeScale + '/' + Math.round(clone.inputs[i].timeScale / clone.inputs[i].frameRate);
+                        }
+                    }
+                    return instance._mux(clone);
                 })
                 .then(() => {
                     return new Promise((resolve, reject) => {
@@ -111,22 +118,26 @@ const create = (options) => {
                                         });
                                     }
                                 }
+
                                 results.sort((a, b) => {
                                     return a.idx - b.idx;
                                 });
-                                var audios = [];
-                                var videos = [];
+
+                                const promises = [];
                                 for (i = 0; i < results.length; i++) {
-                                    if (results[i].ext.match(/adts/)) {
-                                        audios.push(results[i]);
-                                    } else {
-                                        videos.push(results[i]);
-                                    }
+                                    const result = results[i];
+                                    promises.push(new Promise((resolve, reject) => {
+                                        result.fileEntry.file((file) => {
+                                            result.file = file;
+                                            resolve();
+                                        }, reject);
+                                    }));
                                 }
-                                resolve({
-                                    audios: audios,
-                                    videos: videos,
-                                });
+
+                                instance.Promise.all(promises)
+                                    .then(() => {
+                                        resolve(results);
+                                    }, reject);
                             }, reject
                         );
                     }, reject
