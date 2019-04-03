@@ -527,6 +527,41 @@ static int
                 }
             }
 
+            // output tkhd
+            {
+                char filename[255];
+                int n = sizeof filename;
+                int folder_len = 0;
+                const char *output_folder = p_data->options.output_folder;
+
+                if (NULL != output_folder)
+                {
+                    snprintf(filename, n, "%s", output_folder);
+                    folder_len = (int)strlen(output_folder);
+                    n -=  folder_len;
+                }
+
+                if (track_ID > 0)
+                {
+                    ASSURE( snprintf(filename + folder_len, n, "out_%" PRIu32 "_tkhd.json", track_ID) < n,
+                            (" "));
+                }
+                else
+                {
+                    ASSURE( snprintf(filename + folder_len, n, "%s_tkhd.json", stream_name) < n,
+                            (" "));
+                }
+                FILE *fp = fopen(filename, "w");
+                if (fp) {
+                    logout(LOG_VERBOSE_LVL_INFO,"Writing tkhd of track_ID = %" PRIu32 " to %s\n", track_ID, filename);
+                    fprintf(fp, "{\"matrix\":[%d,%d,%d,%d,%d,%d,%d,%d,%d]}",
+                        stream_info.tkhd_matrix[0], stream_info.tkhd_matrix[1], stream_info.tkhd_matrix[2],
+                        stream_info.tkhd_matrix[3], stream_info.tkhd_matrix[4], stream_info.tkhd_matrix[5],
+                        stream_info.tkhd_matrix[6], stream_info.tkhd_matrix[7], stream_info.tkhd_matrix[8]);
+                    fclose(fp);
+                }
+            }
+
             CHECK( p_movie->fragment_stream_new(p_movie, stream_num, stream_name, bitrate, &mp4_source) );
             CHECK( player_set_track(p_data->player, track_ID, stream_name, bitrate, p_movie, mp4_source, sink1, polarssl_flag) );
         }

@@ -17,13 +17,20 @@ const normalizePath = (path) => {
     return path.replace(/^file:\/\//, '');
 };
 
+const loadFile = (url) => {
+    return fetch(url)
+        .then((res) => {
+            return res.text();
+        });
+};
+
 const create = (options) => {
     const instance = {
         // public API
         create: create,
-        Promise: options.Promise || getDefaultPromise(),
+        promise: options.Promise || getDefaultPromise(),
         mux: (options) => {
-            return instance.Promise.resolve()
+            return instance.promise.resolve()
                 .then(() => {
                     const clone = JSON.parse(JSON.stringify(options));
                     // for (let i = 0; i < clone.inputs.length; i++) {
@@ -35,13 +42,13 @@ const create = (options) => {
                     return instance._mux(clone);
                 })
                 .then(() => {
-                    return new Promise((resolve, reject) => {
+                    return new instance.promise((resolve, reject) => {
                         window.resolveLocalFileSystemURL(options.outputPath, resolve, reject);
                     });
                 });
         },
         demux: (options) => {
-            return instance.Promise.resolve()
+            return instance.promise.resolve()
                 .then(() => {
                     return instance._demux(options);
                 })
@@ -50,15 +57,15 @@ const create = (options) => {
                 });
         },
         getAssetInfo: (path) => {
-            return new instance.Promise((resolve, reject) => {
+            return new instance.promise((resolve, reject) => {
                 exec(resolve, reject, service, 'getAssetInfo', [normalizePath(path)]);
             });
         },
         // private API
         _mux: (args) => {
-            return new instance.Promise((resolve, reject) => {
+            return new instance.promise((resolve, reject) => {
                 if (!isArray(args)) {
-                    var originalArgs = args;
+                    const originalArgs = args;
                     args = [
                         '-o',
                         normalizePath(originalArgs.outputPath),
@@ -70,7 +77,7 @@ const create = (options) => {
                         args.push('' + originalArgs.timeScale);
                     }
 
-                    for (var i = 0; i < originalArgs.inputs.length; i++) {
+                    for (let i = 0; i < originalArgs.inputs.length; i++) {
                         args.push('-i');
                         args.push(normalizePath(originalArgs.inputs[i].path));
                         if (originalArgs.inputs[i].timeScale) {
@@ -81,13 +88,19 @@ const create = (options) => {
                             args.push('--input-video-frame-rate');
                             args.push('' + originalArgs.inputs[i].frameRate);
                         }
+                        if (originalArgs.inputs[i].matrix) {
+                            args.push('--media-matrix');
+                            for (let j = 0; j < 9; j++) {
+                                args.push('' + originalArgs.inputs[i].matrix[j]);
+                            }
+                        }
                     }
                 }
                 exec(resolve, reject, service, 'mux', [args]);
             });
         },
         _demux: (args) => {
-            return new instance.Promise((resolve, reject) => {
+            return new instance.promise((resolve, reject) => {
                 if (!isArray(args)) {
                     args = [
                         '--input-file',
@@ -100,22 +113,33 @@ const create = (options) => {
             });
         },
         _listDemuxOutputs: (path) => {
-            return new instance.Promise((resolve, reject) => {
+            return new instance.promise((resolve, reject) => {
                 window.resolveLocalFileSystemURL(path,
                     function (fileSystem) {
-                        var reader = fileSystem.createReader();
+                        const reader = fileSystem.createReader();
                         reader.readEntries(
                             (entries) => {
-                                var i;
-                                var results = [];
+                                let i, j;
+                                const results = [];
                                 for (i = 0; i < entries.length; i++) {
-                                    var m = entries[i].name.match(/out_(\d+)(\..+)/);
+                                    let m = entries[i].name.match(/out_(\d+)(\..+)/);
                                     if (m) {
-                                        results.push({
-                                            idx: +m[1],
-                                            extension: m[2],
-                                            fileEntry: entries[i],
-                                        });
+                                        let tkhdFileEntry;
+                                        for (j = 0; j < entries.length; j++) {
+                                            let mTkhd = entries[j].name.match(/out_(\d+)_tkhd(\..+)/);
+                                            if (mTkhd) {
+                                                tkhdFileEntry = entries[j];
+                                            }
+                                        }
+
+                                        if (tkhdFileEntry) {
+                                            results.push({
+                                                idx: +m[1],
+                                                extension: m[2],
+                                                fileEntry: entries[i],
+                                                tkhdFileEntry: tkhdFileEntry,
+                                            });
+                                        }
                                     }
                                 }
 
@@ -126,15 +150,22 @@ const create = (options) => {
                                 const promises = [];
                                 for (i = 0; i < results.length; i++) {
                                     const result = results[i];
-                                    promises.push(new Promise((resolve, reject) => {
+                                    promises.push(new instance.promise((resolve, reject) => {
                                         result.fileEntry.file((file) => {
                                             result.file = file;
                                             resolve();
                                         }, reject);
                                     }));
+                                    promises.push(new instance.promise((resolve, reject) => {
+                                        loadFile(result.tkhdFileEntry.nativeURL)
+                                            .then((jsonStr) => {
+                                                result.tkhd = JSON.parse(jsonStr);
+                                                resolve();
+                                            }, reject);
+                                    }));
                                 }
 
-                                instance.Promise.all(promises)
+                                instance.promise.all(promises)
                                     .then(() => {
                                         resolve(results);
                                     }, reject);

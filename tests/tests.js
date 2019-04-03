@@ -1,6 +1,6 @@
 exports.defineAutoTests = function () {
     const testDataDir = cordova.file.documentsDirectory + 'test_data/';
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 5 * 60 * 1000;
 
     // download test data
     beforeAll(function (done) {
@@ -81,6 +81,11 @@ exports.defineAutoTests = function () {
                             path: testDataDir +  'h264.h264',
                             timeScale: 600,
                             frameRate: 29.97,
+                            matrix: [
+                                0, 1 * 65536, 0,
+                                -1 * 65536, 0, 0,
+                                1080 * 65536, 0, 1073741824,
+                            ]
                         },
                         {
                             path: testDataDir + 'aaclc.aac',
@@ -95,6 +100,13 @@ exports.defineAutoTests = function () {
                         durationTimeScale: 600,
                         videoFrameRate: 29.97,
                         videoTimeScale: 600,
+                    },
+                    tkhd: {
+                        matrix: [
+                            0, 1 * 65536, 0,
+                            -1 * 65536, 0, 0,
+                            1080 * 65536, 0, 1073741824,
+                        ]
                     }
                 }
             },
@@ -107,6 +119,11 @@ exports.defineAutoTests = function () {
                             path: testDataDir + 'h265.h265',
                             timeScale: 30000,
                             frameRate: 29.97,
+                            matrix: [
+                                1 * 65536, 0, 0,
+                                0, 1 * 65536, 0,
+                                0, 0, 1073741824,
+                            ]
                         },
                         {
                             path: testDataDir + 'aaclc.aac',
@@ -121,6 +138,13 @@ exports.defineAutoTests = function () {
                         durationTimeScale: 1000,
                         videoFrameRate: 29.97,
                         videoTimeScale: 30000,
+                    },
+                    tkhd: {
+                        matrix: [
+                            1 * 65536, 0, 0,
+                            0, 1 * 65536, 0,
+                            0, 0, 1073741824,
+                        ]
                     }
                 }
             },
@@ -150,9 +174,28 @@ exports.defineAutoTests = function () {
                         .then((info) => {
                             console.log('getAssetInfo succeeded');
                             console.log(info);
-                            console.log(test.assetInfo);
+                            console.log(test.output.assetInfo);
                             info.videoFrameRate = +(info.videoFrameRate.toFixed(2));
-                            expect(info).toEqual(test.output.assetInfo);
+                            expect(info.durationValue).toEqual(test.output.assetInfo.durationValue);
+                            expect(info.durationTimeScale).toEqual(test.output.assetInfo.durationTimeScale);
+                            expect(info.videoFrameRate).toEqual(test.output.assetInfo.videoFrameRate);
+                            expect(info.videoTimeScale).toEqual(test.output.assetInfo.videoTimeScale);
+                            return cordova.plugins.mp4muxdemux.demux({
+                                inputPath: test.input.outputPath,
+                                outputDir: cordova.file.dataDirectory + 'h264aaclc_mux_test'
+                            });
+                        })
+                        .then((outputs) => {
+                            console.log('demux succeeded');
+                            let videoTkhd;
+                            outputs.forEach((output) => {
+                                if (output.extension.match(/h26/)) {
+                                    videoTkhd = output.tkhd;
+                                }
+                            });
+                            console.log(videoTkhd);
+                            console.log(test.output.tkhd);
+                            expect(videoTkhd).toEqual(test.output.tkhd);
                             done();
                         })
                         .catch(done.fail);
@@ -181,6 +224,13 @@ exports.defineAutoTests = function () {
                     },
                     file: {
                         size: 6970158,
+                    },
+                    tkhd: {
+                        matrix: [
+                            0, 1 * 65536, 0,
+                            -1 * 65536, 0, 0,
+                            0, 0, 1073741824,
+                        ]
                     }
                 }, {
                     idx: 2,
@@ -216,6 +266,13 @@ exports.defineAutoTests = function () {
                     },
                     file: {
                         size: 45146,
+                    },
+                    tkhd: {
+                        matrix: [
+                            1 * 65536, 0, 0,
+                            0, 1 * 65536, 0,
+                            0, 0, 1073741824,
+                        ]
                     }
                 }]
             },
@@ -262,6 +319,12 @@ exports.defineAutoTests = function () {
                     durationTimeScale: 600,
                     videoFrameRate: 29.97,
                     videoTimeScale: 600,
+                    matrixA: 0,
+                    matrixB: 1,
+                    matrixC: -1,
+                    matrixD: 0,
+                    matrixTx: 1080,
+                    matrixTy: 0,
                 }
             },
             {
@@ -272,6 +335,12 @@ exports.defineAutoTests = function () {
                     durationTimeScale: 1000,
                     videoFrameRate: 29.97,
                     videoTimeScale: 30000,
+                    matrixA: 1,
+                    matrixB: 0,
+                    matrixC: 0,
+                    matrixD: 1,
+                    matrixTx: 0,
+                    matrixTy: 0,
                 }
             },
         ];
