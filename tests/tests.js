@@ -1,26 +1,10 @@
 exports.defineAutoTests = function () {
-    var originalTimeout;
-    let testFiles = {};
+    const testDataDir = cordova.file.documentsDirectory + 'test_data/';
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
 
     // download test data
-    beforeAll((done) => {
-        downloader.init({folder: "test_data", unzip: false, check: true});
-
-        document.addEventListener('DOWNLOADER_downloadSuccess', function(event) {
-            event.data.forEach((fileEntry) => {
-                testFiles[fileEntry.name] = fileEntry;
-            });
-            console.log('test data donwloaded');
-            done();
-        });
-        document.addEventListener('DOWNLOADER_downloadError', function(err) {
-            console.log('test data donwload failed');
-            console.log(err);
-            done(err);
-        });
-        
-        console.log('test data downloading');
-        downloader.getMultipleFiles([
+    beforeAll(function (done) {
+        const requests = [
             {
                 url: 'https://github.com/contribu/mp4muxdemux/raw/master/tests/data/h264aaclc.mp4'
             },
@@ -45,16 +29,30 @@ exports.defineAutoTests = function () {
             {
                 url: 'https://github.com/contribu/mp4muxdemux/raw/master/tests/data/h265.h265'
             },
-        ]);
-    });
+        ];
+        console.log(requests);
+        let downloadedCount = 0;
+        downloader.init({folder: 'test_data', unzip: false, check: true});
 
-    beforeEach(function() {
-        originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-        jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
-    });
+        document.addEventListener('DOWNLOADER_downloadSuccess', function(event) {
+            event.data.forEach((fileEntry) => {
+                console.log('test data downloaded ' + fileEntry.name);
+                console.log(fileEntry);
+                downloadedCount += 1;
+                if (downloadedCount === requests.length) {
+                    console.log('test data all downloaded');
+                    done();
+                }
+            });
+        });
+        document.addEventListener('DOWNLOADER_downloadError', function(err) {
+            console.log('test data download failed');
+            console.log(err);
+            done.fail(err);
+        });
 
-    afterEach(function() {
-        jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
+        console.log('test data downloading');
+        downloader.getMultipleFiles(requests);
     });
 
     describe("create", function () {
@@ -80,23 +78,23 @@ exports.defineAutoTests = function () {
                     outputPath: cordova.file.dataDirectory + 'h264aaclc_mux.mp4',
                     inputs: [
                         {
-                            path: testFiles['h264.h264'].nativeURL,
-                            timeScale: 60000,
-                            frameRate: 29,
+                            path: testDataDir +  'h264.h264',
+                            timeScale: 600,
+                            frameRate: 29.97,
                         },
                         {
-                            path: testFiles['aaclc.aac'].nativeURL,
+                            path: testDataDir + 'aaclc.aac',
                         },
                     ],
-                    timeScale: 60000,
+                    timeScale: 600,
                 },
                 output: {
-                    fileSize: 1000,
+                    fileSize: 7016978,
                     assetInfo: {
-                        durationValue: 3.603,
-                        durationTimeScale: 3.603,
-                        videoFrameRate: 1,
-                        videoTimeScale: 1,
+                        durationValue: 2201, // It seems that there is some error
+                        durationTimeScale: 600,
+                        videoFrameRate: 29.97,
+                        videoTimeScale: 600,
                     }
                 }
             },
@@ -106,23 +104,23 @@ exports.defineAutoTests = function () {
                     outputPath: cordova.file.dataDirectory + 'h265aaclc_mux.mp4',
                     inputs: [
                         {
-                            path: testFiles['h265.h265'].nativeURL,
-                            timeScale: 60000,
-                            frameRate: 29,
+                            path: testDataDir + 'h265.h265',
+                            timeScale: 30000,
+                            frameRate: 29.97,
                         },
                         {
-                            path: testFiles['aaclc.aac'].nativeURL,
+                            path: testDataDir + 'aaclc.aac',
                         },
                     ],
-                    timeScale: 60000,
+                    timeScale: 1000,
                 },
                 output: {
-                    fileSize: 1000,
+                    fileSize: 233571,
                     assetInfo: {
-                        durationValue: 3.603,
-                        durationTimeScale: 3.603,
-                        videoFrameRate: 1,
-                        videoTimeScale: 1,
+                        durationValue: 3669, // It seems that there is some error
+                        durationTimeScale: 1000,
+                        videoFrameRate: 29.97,
+                        videoTimeScale: 30000,
                     }
                 }
             },
@@ -130,27 +128,34 @@ exports.defineAutoTests = function () {
 
         tests.forEach((test) => {
             describe(test.name, function () {
-                it("success", function (done) {
-                    cordova.plugins.mp4muxdemux.mux(test.input)
+                it('success', function (done) {
+                    Promise.resolve()
                         .then(() => {
+                            console.log('mux start');
+                            return cordova.plugins.mp4muxdemux.mux(test.input);
+                        })
+                        .then((fileEntry) => {
+                            console.log('mux succeeded');
                             return new Promise((resolve, reject) => {
-                                window.resolveLocalFileSystemURL(test.input.outputPath,
-                                    (fileEntry) => {
-                                        fileEntry.file(resolve, reject);
-                                    }, reject);
+                                fileEntry.file(resolve, reject);
                             });
                         })
                         .then((file) => {
-                            expect(file.size).toEqual(test.output.fileSize);
+                            console.log('file succeeded');
+                            console.log(file.size);
+                            console.log(test.output.fileSize);
+                            expect(file.size / 1024).toBeCloseTo(test.output.fileSize / 1024, 0);
                             return cordova.plugins.mp4muxdemux.getAssetInfo(test.input.outputPath);
                         })
                         .then((info) => {
-                            expect(info).toEqual(test.assetInfo);
+                            console.log('getAssetInfo succeeded');
+                            console.log(info);
+                            console.log(test.assetInfo);
+                            info.videoFrameRate = +(info.videoFrameRate.toFixed(2));
+                            expect(info).toEqual(test.output.assetInfo);
                             done();
                         })
-                        .catch((err) => {
-                            done('failed ' + err);
-                        });
+                        .catch(done.fail);
                 });
             });
         });
@@ -165,52 +170,52 @@ exports.defineAutoTests = function () {
             {
                 name: 'h264aaclc.mp4',
                 input: {
-                    inputPath: testFiles['h264aaclc.mp4'].nativeURL,
-                    outputDir: cordova.file.dataDirectory + '/h264aaclc'
+                    inputPath: testDataDir + 'h264aaclc.mp4',
+                    outputDir: cordova.file.dataDirectory + 'h264aaclc'
                 },
                 output: [{
                     idx: 1,
                     extension: '.h264',
                     fileEntry: {
-                        nativeURL: cordova.file.dataDirectory + '/h264aaclc/out_1.h264',
+                        nativeURL: cordova.file.dataDirectory + 'h264aaclc/out_1.h264',
                     },
                     file: {
-                        size: 1,
+                        size: 6970158,
                     }
                 }, {
                     idx: 2,
                     extension: '.adts',
                     fileEntry: {
-                        nativeURL: cordova.file.dataDirectory + '/h264aaclc/out_2.adts',
+                        nativeURL: cordova.file.dataDirectory + 'h264aaclc/out_2.adts',
                     },
                     file: {
-                        size: 1,
+                        size: 45449,
                     }
                 }]
             },
             {
                 name: 'h265aaclc.mp4',
                 input: {
-                    inputPath: testFiles['h265aaclc.mp4'].nativeURL,
-                    outputDir: cordova.file.dataDirectory + '/h265aaclc'
+                    inputPath: testDataDir + 'h265aaclc.mp4',
+                    outputDir: cordova.file.dataDirectory + 'h265aaclc'
                 },
                 output: [{
                     idx: 1,
                     extension: '.h265',
                     fileEntry: {
-                        nativeURL: cordova.file.dataDirectory + '/h265aaclc/out_1.h265',
+                        nativeURL: cordova.file.dataDirectory + 'h265aaclc/out_1.h265',
                     },
                     file: {
-                        size: 1,
+                        size: 185903,
                     }
                 }, {
                     idx: 2,
                     extension: '.adts',
                     fileEntry: {
-                        nativeURL: cordova.file.dataDirectory + '/h265aaclc/out_2.adts',
+                        nativeURL: cordova.file.dataDirectory + 'h265aaclc/out_2.adts',
                     },
                     file: {
-                        size: 1,
+                        size: 45146,
                     }
                 }]
             },
@@ -219,20 +224,25 @@ exports.defineAutoTests = function () {
         tests.forEach((test) => {
             describe(test.name, function () {
                 it("success", function (done) {
-                    cordova.plugins.mp4muxdemux.demux(test.input)
+                    Promise.resolve()
+                        .then(() => {
+                            console.log('demux start');
+                            return cordova.plugins.mp4muxdemux.demux(test.input);
+                        })
                         .then((results) => {
+                            console.log('demux succeeded');
+                            console.log(results);
+                            console.log(test.output);
                             expect(results.length).toEqual(test.output.length);
                             for (let i = 0; i < results.length; i++) {
                                 expect(results[i].idx).toEqual(test.output[i].idx);
                                 expect(results[i].extension).toEqual(test.output[i].extension);
                                 expect(results[i].fileEntry.nativeURL).toEqual(test.output[i].fileEntry.nativeURL);
-                                expect(results[i].file.size).toEqual(test.output[i].file.size);
+                                expect(results[i].file.size / 1024).toBeCloseTo(test.output[i].file.size / 1024, 0);
                             }
                             done();
                         })
-                        .catch((err) => {
-                            done('failed ' + err);
-                        });
+                        .catch(done.fail);
                 });
             });
         });
@@ -246,22 +256,22 @@ exports.defineAutoTests = function () {
         const tests = [
             {
                 name: 'h264aaclc.mp4',
-                input: testFiles['h264aaclc.mp4'].nativeURL,
+                input: testDataDir + 'h264aaclc.mp4',
                 output: {
-                    durationValue: 3.603,
-                    durationTimeScale: 3.603,
-                    videoFrameRate: 1,
+                    durationValue: 2162,
+                    durationTimeScale: 600,
+                    videoFrameRate: 29.97,
                     videoTimeScale: 600,
                 }
             },
             {
                 name: 'h265aaclc.mp4',
-                input: testFiles['h265aaclc.mp4'].nativeURL,
+                input: testDataDir + 'h265aaclc.mp4',
                 output: {
-                    durationValue: 3.603,
-                    durationTimeScale: 3.603,
-                    videoFrameRate: 1,
-                    videoTimeScale: 1,
+                    durationValue: 3604,
+                    durationTimeScale: 1000,
+                    videoFrameRate: 29.97,
+                    videoTimeScale: 30000,
                 }
             },
         ];
@@ -269,14 +279,20 @@ exports.defineAutoTests = function () {
         tests.forEach((test) => {
             describe(test.name, function () {
                 it("success", function (done) {
-                    cordova.plugins.mp4muxdemux.getAssetInfo(test.input)
+                    Promise.resolve()
+                        .then(() => {
+                            console.log('getAssetInfo start');
+                            return cordova.plugins.mp4muxdemux.getAssetInfo(test.input);
+                        })
                         .then((info) => {
+                            console.log('getAssetInfo succeeded');
+                            console.log(info);
+                            console.log(test.output);
+                            info.videoFrameRate = +(info.videoFrameRate.toFixed(2));
                             expect(info).toEqual(test.output);
                             done();
                         })
-                        .catch((err) => {
-                            done('failed ' + err);
-                        });
+                        .catch(done.fail);
                 });
             });
         });

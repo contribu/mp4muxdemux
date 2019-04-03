@@ -77,7 +77,7 @@
                                 nil];
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:result];
     } else {
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"video track is not found"];
     }
 
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];

@@ -25,13 +25,13 @@ const create = (options) => {
         mux: (options) => {
             return instance.Promise.resolve()
                 .then(() => {
-                    const clone = JSON.parse(JSON.generate(options));
-                    for (let i = 0; i < clone.inputs.length; i++) {
-                        if (clone.inputs[i].frameRate) {
-                            // for accuracy
-                            clone.inputs[i].frameRate = clone.inputs[i].timeScale + '/' + Math.round(clone.inputs[i].timeScale / clone.inputs[i].frameRate);
-                        }
-                    }
+                    const clone = JSON.parse(JSON.stringify(options));
+                    // for (let i = 0; i < clone.inputs.length; i++) {
+                    //     if (clone.inputs[i].frameRate) {
+                    //         // for accuracy
+                    //         clone.inputs[i].frameRate = clone.inputs[i].timeScale + '/' + Math.round(clone.inputs[i].timeScale / clone.inputs[i].frameRate);
+                    //     }
+                    // }
                     return instance._mux(clone);
                 })
                 .then(() => {
